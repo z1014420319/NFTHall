@@ -15,12 +15,7 @@ export const Footer = () => {
             <div className="text-center">欢迎来到 NFT 展览馆 🎉</div>
             <span>·</span>
             <div className="text-center">
-              <a
-                href="https://github.com/z1014420319/NFTExhibitionHall"
-                target="_blank"
-                rel="noreferrer"
-                className="link"
-              >
+              <a href="https://github.com/z1014420319/NFTHall" target="_blank" rel="noreferrer" className="link">
                 GitHub
               </a>
             </div>
