@@ -1,5 +1,4 @@
 import React from "react";
-import { FaucetButton } from "./scaffold-eth";
 
 /**
  * Site footer
@@ -26,7 +25,6 @@ export const Footer = () => {
               </a>
             </div>
           </div>
-          <FaucetButton />
         </ul>
       </div>
     </div>
