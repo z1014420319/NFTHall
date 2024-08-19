@@ -13,7 +13,7 @@ export default function ImageDisplayModal({ tokenInfo, closeImageModal }: ImageD
     >
       <div className="flex justify-center">
         <span className="font-semibold">标题：</span>
-        <span>{tokenInfo.description}</span>
+        <span>{tokenInfo.title}</span>
       </div>
       <div
         className="relative"
