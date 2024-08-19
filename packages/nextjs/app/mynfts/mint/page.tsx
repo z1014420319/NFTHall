@@ -19,6 +19,8 @@ export type Metadata = {
   image: string;
 };
 
+const ITEMS_PER_PAGE = 5;
+
 export default function MintNFT() {
   const { address } = useAccount();
   const [image, setImage] = useState<File | null>(null);
@@ -26,7 +28,6 @@ export default function MintNFT() {
   const [description, setDescription] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
 
   const router = useRouter();
 
@@ -100,9 +101,9 @@ export default function MintNFT() {
     }
   };
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedMintEvent = mintEvent?.slice(startIndex, startIndex + itemsPerPage);
-  const totalPages = Math.ceil((mintEvent?.length || 0) / itemsPerPage);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedMintEvent = mintEvent?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const totalPages = Math.ceil((mintEvent?.length || 0) / ITEMS_PER_PAGE);
 
   if (!address) {
     return <Unconnected />;

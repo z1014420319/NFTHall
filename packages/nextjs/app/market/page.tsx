@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
@@ -10,34 +11,31 @@ import { useScaffoldContract, useScaffoldReadContract, useScaffoldWriteContract 
 import { useMetaData } from "~~/hooks/useMetadata";
 import { notification } from "~~/utils/scaffold-eth";
 
+const ITEMS_PER_PAGE = 5;
+
 export default function NFTMarket() {
   const { address } = useAccount();
   const router = useRouter();
 
   const { data: MyERC721 } = useScaffoldContract({ contractName: "MyERC721" });
-
   const { data: balance } = useScaffoldReadContract({
     contractName: "MyERC20",
     functionName: "balanceOf",
     args: [address],
   });
-
   const { data: symbol } = useScaffoldReadContract({
     contractName: "MyERC20",
     functionName: "symbol",
   });
-
   const { data: currentAllowance } = useScaffoldReadContract({
     contractName: "MyERC20",
     functionName: "allowance",
     args: [address, MyERC721?.address],
   });
-
   const { data: forDisplayNFTs } = useScaffoldReadContract({
     contractName: "MyERC721",
     functionName: "getAllTokensForDisplay",
   });
-
   const { data: ownedNFTs } = useScaffoldReadContract({
     contractName: "MyERC721",
     functionName: "getTokensOwnedBy",
@@ -47,7 +45,6 @@ export default function NFTMarket() {
   const metaDatas = useMetaData(forDisplayNFTs);
 
   const { openImageModal, closeImageModal, tokenInfo } = useImageDisplayModal();
-
   const { writeContractAsync: writeMyERC721Async } = useScaffoldWriteContract("MyERC721");
 
   const handleBuyNFT = async (tokenId: bigint, price: bigint) => {
@@ -66,6 +63,15 @@ export default function NFTMarket() {
   const handleViewTransactionHistory = () => {
     router.push("/market/transaction");
   };
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil((forDisplayNFTs?.length ?? 0) / ITEMS_PER_PAGE);
+
+  const paginatedNFTs = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return forDisplayNFTs?.slice(startIndex, startIndex + ITEMS_PER_PAGE) || [];
+  }, [currentPage, forDisplayNFTs]);
 
   if (!address) {
     return <Unconnected />;
@@ -94,11 +100,11 @@ export default function NFTMarket() {
 
         <div>
           <h2 className="mb-4 text-2xl font-semibold">欢迎参观：</h2>
-          {forDisplayNFTs?.length === 0 ? (
+          {paginatedNFTs.length === 0 ? (
             <p className="text-gray-600 dark:text-gray-400">没有记录。</p>
           ) : (
             <ul className="space-y-4">
-              {forDisplayNFTs?.map(tokenInfo => {
+              {paginatedNFTs.map(tokenInfo => {
                 const isMyOwned = ownedNFTs?.some(ownedItems => ownedItems.tokenId === tokenInfo.tokenId);
                 const isSelling = tokenInfo.price > 0;
                 const isDisplaying = tokenInfo.price === 0n;
@@ -158,7 +164,31 @@ export default function NFTMarket() {
             </ul>
           )}
         </div>
+
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-4 space-x-2">
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-2 py-1 text-white bg-blue-500 rounded hover:bg-blue-700 disabled:bg-gray-600"
+            >
+              {"<"}
+            </button>
+            <span className="px-2 py-1 bg-gray-200 rounded dark:bg-gray-600">
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className="px-2 py-1 text-white bg-blue-500 rounded hover:bg-blue-700 disabled:bg-gray-600"
+            >
+              {">"}
+            </button>
+          </div>
+        )}
       </div>
+
       <ImageDisplayModal tokenInfo={tokenInfo} closeImageModal={closeImageModal} />
     </div>
   );
